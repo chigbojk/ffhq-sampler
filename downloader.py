@@ -1,41 +1,52 @@
 import json
-import gdown
-
 import os
 import io
 from Google import Create_Service
 from googleapiclient.http import MediaIoBaseDownload
+from datetime import datetime as dt
 
 CLIENT_SECRET_FILE = 'credentials.json'
 API_NAME = 'drive'
 API_VERSION = 'v3'
 SCOPES = ['https://www.googleapis.com/auth/drive']
-
-service = Create_Service(CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
-
 JSON_FILE = 'out.json'
-with open(JSON_FILE, 'r') as f:    
-    data = json.load(f)
-    for i, entry in enumerate(data):
 
-        id = entry['id']
-        print("[{0}/{1}] Downloading photo #{2}".format(i + 1, len(data), id))
+def main():
+    service = Create_Service(CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
+    timeA = dt.now()
 
-        id = entry['file_url'].split('=')[1]
-        output = './images/' + id + '.png'
-        
-        request = service.files().get_media(fileId=id)
+    with open(JSON_FILE, 'r') as f:    
+        data = json.load(f)
+        for i, entry in enumerate(data):
 
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fd=fh, request=request)
-        done = False
+            id = entry['id']
+            output = './images/' + str(id) + '.png'
+            
+            if os.path.exists(output):
+                print("[{0}/{1}] Photo #{2} already exists! Skipping...".format(i + 1, len(data), id))
+            else:
+                print("[{0}/{1}] Downloading photo #{2}".format(i + 1, len(data), id))
 
-        while not done:
-            status, done = downloader.next_chunk()
+                id = entry['file_url'].split('=')[1]
+                
+                request = service.files().get_media(fileId=id)
+                fh = io.BytesIO()
+                downloader = MediaIoBaseDownload(fd=fh, request=request)
+                
+                done = False
 
-        fh.seek(0)
+                while not done:
+                    status, done = downloader.next_chunk()
 
-        with open(os.path.join(output), 'wb') as f:
-            f.write(fh.read())
-            f.close()
-        # gdown.download(url, output, quiet=False)
+                fh.seek(0)
+
+                with open(os.path.join(output), 'wb') as f:
+                    f.write(fh.read())
+                    f.close()
+
+    timeB = dt.now()
+    
+    print('Time taken: ' + str(timeB - timeA))
+
+if __name__ == "__main__":
+    main()

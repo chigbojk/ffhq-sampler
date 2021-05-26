@@ -5,34 +5,44 @@
 
 import json
 import random
-import pprint
+import sys
 from datetime import datetime as dt
 
-FILE_PATH = "ffhq-dataset-v2.json"
-NO_OF_SAMPLES = 5
+def main():
+    FILE_PATH = "ffhq-dataset-v2.json"
+    NO_OF_SAMPLES = 10
 
-randomNos = random.sample(range(70000), NO_OF_SAMPLES)
+    print(len(sys.argv))
+    print(sys.argv)
+    if len(sys.argv) == 3:
+        if sys.argv[1].lower() in '--size':
+            NO_OF_SAMPLES = int(sys.argv[2])
 
-timeA = dt.now()
+    randomNos = random.sample(range(70000), NO_OF_SAMPLES)
 
-res = []
+    timeA = dt.now()
 
-d = dict()
-with open(FILE_PATH, 'r') as f:
-    data = json.loads(f.read())
+    res = []
 
-    for i in randomNos:
-        data[str(i)]['image']['id'] = i
-        res.append(data[str(i)]['image'])
-        d[i] = res[-1]
+    d = dict()
+    with open(FILE_PATH, 'r') as f:
+        data = json.loads(f.read())
+
+        for i in randomNos:
+            data[str(i)]['image']['id'] = i
+            res.append(data[str(i)]['image'])
+            d[i] = res[-1]
 
 
-for k, v in d.items():
-    print(k, v, '\n\n')
+    for k in d.keys():
+        print(k, '\n')
 
-with open("out.json", "w") as f:
-    json.dump(res, f)
+    with open("out.json", "w") as f:
+        json.dump(res, f)
 
-timeB = dt.now()
+    timeB = dt.now()
 
-print('Time to extract from json file = ' + str(timeB - timeA))
+    print('Time to extract from json file = ' + str(timeB - timeA))
+
+if __name__ == "__main__":
+    main()
