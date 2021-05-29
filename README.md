@@ -10,4 +10,4 @@ random sampler for NVlabs' ffhq dataset. part of dissertation project
 
 ## downloader
 1. $python downloader.py
-2. populates images folder with aforementioned sampled data
+2. saves aforementioned sampled images to images directory
